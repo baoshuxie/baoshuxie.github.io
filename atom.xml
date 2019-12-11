@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://baoshuxie.github.io</id>
     <title>他的国</title>
-    <updated>2019-12-11T02:39:43.008Z</updated>
+    <updated>2019-12-11T06:25:12.069Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://baoshuxie.github.io"/>
     <link rel="self" href="https://baoshuxie.github.io/atom.xml"/>
@@ -10,4 +10,19 @@
     <logo>https://baoshuxie.github.io/images/avatar.png</logo>
     <icon>https://baoshuxie.github.io/favicon.ico</icon>
     <rights>All rights reserved 2019, 他的国</rights>
+    <entry>
+        <title type="html"><![CDATA[关于]]></title>
+        <id>https://baoshuxie.github.io/post/guan-yu</id>
+        <link href="https://baoshuxie.github.io/post/guan-yu">
+        </link>
+        <updated>2019-12-11T02:40:30.000Z</updated>
+        <content type="html"><![CDATA[<p>我想了很久，确实不知道自己应该在关于里面写些什么。</p>
+<p>很久以前我就知道，世界和他人怎么看待你，并不取决于你喜欢什么电影什么书什么电视剧什么游戏，也不取决于你对万事万物的看法，取决于 你为这个世界创造了什么。</p>
+<p>那么我为这个世界创造了什么呢？惭愧，好像并没有什么值得称道的内容。</p>
+<p>2012-2016 西南财经大学电子商务专业<br>
+2016-2017 互联网产品经理<br>
+2018-2021 清华大学清华伯克利深圳学院数据科学专业</p>
+<p>邮箱   swufe_ljj@163.com</p>
+]]></content>
+    </entry>
 </feed>
