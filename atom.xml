@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://baoshuxie.github.io</id>
+    <title>他的国</title>
+    <updated>2019-12-11T02:39:43.008Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://baoshuxie.github.io"/>
+    <link rel="self" href="https://baoshuxie.github.io/atom.xml"/>
+    <subtitle>人生到处知何似，应似飞鸿踏雪泥</subtitle>
+    <logo>https://baoshuxie.github.io/images/avatar.png</logo>
+    <icon>https://baoshuxie.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2019, 他的国</rights>
+</feed>
