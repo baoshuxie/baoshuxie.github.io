@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>回溯算法详解（python) | 他的国</title>
 <meta name="description" content="人生到处知何似，应似飞鸿踏雪泥" />
-<link rel="shortcut icon" href="https://baoshuxie.github.io/favicon.ico?v=1577267217448">
+<link rel="shortcut icon" href="https://baoshuxie.github.io/favicon.ico?v=1577435953933">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://baoshuxie.github.io/styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://baoshuxie.github.io">
-  <img class="avatar" src="https://baoshuxie.github.io/images/avatar.png?v=1577267217448" alt="">
+  <img class="avatar" src="https://baoshuxie.github.io/images/avatar.png?v=1577435953933" alt="">
   </a>
   <h1 class="site-title">
     他的国
@@ -108,7 +108,7 @@ def backtrack(路径，选择列表):
         return 
     for 选择 in 选择列表：
         更新路径和选择列表
-        backtr（新的路径，新的选择列表）
+        backtrack（新的路径，新的选择列表）
         
     return results
 </code></pre>
@@ -129,8 +129,8 @@ def backtrack(路径，选择列表):
     candidates.sort()
     results=[]
     
-    # i 和 sum是当前的选择，trace 是路径
-    def traceback(i,sum,trace):
+    # i 和 sum是当前的选择，track 是路径
+    def backtrack(i,sum,track):
         
         # 路径结束，不满足约束条件
         if sum &gt; target or i == n:
@@ -138,15 +138,15 @@ def backtrack(路径，选择列表):
             
         # 路径结束，满足约束条件
         if sum == target:
-            results.append(trace)
+            results.append(track)
             return 
         
         # 更新选择列表和路径，递归
         # 在这个问题中，选择只有两种，是否将当前数字纳入路径
-        traceback(i, sum+candidates[i], traceback+[[candidates[i]])
-        traceback(i+1, sum, traceback)
+        backtrack(i, sum+candidates[i], track+[[candidates[i]])
+        backtrack(i+1, sum, track)
         
-    traceback(0,0,[])
+    backtrack(0,0,[])
     return results
 </code></pre>
 <h3 id="2-leetcode46-全排列">2. leetcode46 全排列</h3>
@@ -155,22 +155,21 @@ def backtrack(路径，选择列表):
 输入：[1,2,3]<br>
 输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]</p>
 <pre><code>def permute(nums:List[int]) -&gt; List[List[int]]:
-    n = len(nums)
     nums.sort()
     results=[]
     
-    #nums是选择列表，trace 是路径
-    def traceback(nums,trace):
+    #nums是选择列表，track 是路径
+    def backtrack(nums,track):
         
         #路径结束满足约束条件
         if not nums:
-            results.append(trace)
+            results.append(track)
             return 
         
         #更新选择列表和路径，递归
-        #在这个问题中，选择有 n-len(trace)这么多种
+        #在这个问题中，选择有 n-len(track)这么多种
         for i in range(len(nums))：
-            traceback(nums[:i]+nums[i+1:],trace+[nums[i]])
+            traceback(nums[:i]+nums[i+1:],track+[nums[i]])
             
     backtrack(nums,[])
     return results
@@ -187,15 +186,15 @@ def backtrack(路径，选择列表):
 </ol>
 <pre><code>def solveNQueens(n:int)-&gt;List[list[str]]:
 
-    #首先我们明确一下皇后的位置如何表示，皇后在 trace 中的索引代表它所处的列，它的值表示它所在的行
-    #比如 trace[1]=2,表明第二行第一列放置一个皇后
+    #首先我们明确一下皇后的位置如何表示，皇后在 track 中的索引代表它所处的列，它的值表示它所在的行
+    #比如 track[1]=2,表明第二行第一列放置一个皇后
     results=[]
     
-    #trace 表示路径，xy_dif 和 xy_sum 用来计算两个皇后是否在同一斜线上
-    def traceback(trace,xy_dif,xy_sum):
-        p = len(trace)
+    #track 表示路径，xy_dif 和 xy_sum 用来计算两个皇后是否在同一斜线上
+    def backtrack(track,xy_dif,xy_sum):
+        p = len(track)
         if p==n:
-            results.append(trace)
+            results.append(track)
             return 
         
         for q in range(n):  
@@ -204,11 +203,11 @@ def backtrack(路径，选择列表):
             #2. 两个皇后不能处在同一行，则它们的值必然不同
             #3. 两个皇后不能处在左上-右下这种位置，则它们横纵坐标之差必然不同（举例，如(3,4)和（4,5）
             #4. 两个皇后不能处在右上-左下这种位置，则它们横纵坐标之和必然不同（举例，如(3,4)和（4,3)
-            if (q not in trace) and (p-q not in xy_dif) and （p+q not in xy_sum):
-                traceback(trace+[q],xy_dif+[p-q],xy_sum+[p+q])
+            if (q not in track) and (p-q not in xy_dif) and （p+q not in xy_sum):
+                backtrack(track+[q],xy_dif+[p-q],xy_sum+[p+q])
             
     
-    traceback([],[],[])
+    backtrack([],[],[])
     return [['.'*i + 'Q' + '.' *(n-i-1) for i in result] for result in results]
     
 </code></pre>
