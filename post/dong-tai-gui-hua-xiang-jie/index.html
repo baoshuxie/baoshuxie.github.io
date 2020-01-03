@@ -1,0 +1,425 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划详解 | 他的国</title>
+<meta name="description" content="人生到处知何似，应似飞鸿踏雪泥" />
+<link rel="shortcut icon" href="https://baoshuxie.github.io/favicon.ico?v=1578066021651">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://baoshuxie.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://baoshuxie.github.io">
+  <img class="avatar" src="https://baoshuxie.github.io/images/avatar.png?v=1578066021651" alt="">
+  </a>
+  <h1 class="site-title">
+    他的国
+  </h1>
+  <p class="site-description">
+    人生到处知何似，应似飞鸿踏雪泥
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/guan-yu" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划详解
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-01-03
+              </span>
+              <span>
+                11 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>在上一篇《回溯算法详解》里面，我谈到动态规划也是分治思想的一种。分治思想就是把一个问题拆分成数个子问题，通过求解数个子问题，再将子问题的解合并。<br>
+分治思想所能解决的问题一般具有以下几个特征：</p>
+<ol>
+<li>该问题的规模缩小到一定程度就可以容易解决，也就是 f(0)和 f(1)或者说递归基是很好得的</li>
+<li>该问题被分解成若干子问题后，这些子问题可以同样被分解成更小的问题，也就是，可以递归</li>
+<li>子问题的解可以合并为该问题的解</li>
+<li>各个子问题之间是独立的</li>
+</ol>
+<p>但是显然，如果一个问题只能按照分治的想法分别求解各个子问题并递归，这个暴力解法的复杂度将达到 O(2^n)。让我们来思考一下如何优化，考虑第 4 个条件，当各个子问题不独立的时候，我们能不能把重复的子问题合并或者将不符合条件的子问题删除从而减少复杂度？</p>
+<p>思考 斐波拉契数列的递归写法</p>
+<pre><code>def fib(n):
+    if n==0 or n==1:
+        return 1
+    else:
+        return fib(n-1)+fib(n-2)
+</code></pre>
+<p>这是 O(2^n)复杂度的递归,因为对于每个 fib(n)，我们都分别去求它的两个子问题fib(n-1)和 fib(n-2)，显然，从 fib(0)到 fib(n)只有 n 个数，这 n 个数我们却计算了 2^n 次。那么我们能否只计算 n 次呢？</p>
+<pre><code>def fib(n):
+    fib=[1,1]
+    i=2
+    while i&lt;=n:
+      fib.append(fib[i-1]+fib[i-2])
+      i += 1
+    return fib[n]
+</code></pre>
+<p>在这里，我们使用了一个数组来记录 fib(n)，以空间换时间，每次需要 fib(n-1)和 fib(n-2)时，只需查找数组即可，无需重新计算。也就是对于每一个 fib(n)只计算一次，从而达到线性复杂度的目的。</p>
+<p>让我们重新来看动态规划，举一个动态规划的例子，找零钱。</p>
+<p><strong>LeetCode 322.Coin Change</strong><br>
+<strong>已知不同面值的钞票，求如何用最少数量的钞票组成某个金额，求可以使用的最少钞票数量。如果无法租车该金额，则返回 -1</strong><br>
+<strong>示例</strong><br>
+输入：coins=[1,2,5],amount=11<br>
+输出：3</p>
+<p>显然，暴力方法不可取，复杂度太高。我们逆向来思考一下，假如我们最少使用了 n 张钞票凑出了 amount，记为 f(n,amount),那它必是由n-1张凑出了{amount-1，amount-2，amount-5}中的任意一个再加上一张钞票得来的。<br>
+也就是说，f(n,amount)=min(f(n-1,amount-1),f(n-1,amount-2),f(n-1,amount-5)）+1</p>
+<p>动态规划问题必须满足以下几个性质：</p>
+<ol>
+<li>无后效性，也就是当前状态的解一旦确定，这以后的状态就不会受以前的状态所影响，只与当前状态有关（类似随机过程中的马尔科夫过程），就如凑零钱的问题，一旦凑出了 f(n-1,amount-1)和 f(n-1，amount-2),f(n-1,amount-5)之后，如何凑出来的就不用管了，只需要考虑最后一张的问题。</li>
+<li>最优子结构，也就是问题的最优解可由其子问题的最优解所得出。在这个问题里，f(n）的最优解必然来自f(n-1,amount-1),f(n-1,amount-2),f(n-1,amount-2)中的最优解。在此注意，动态规划和贪心算法的不同，对动态规划来说，问题的最优解可由其若干子问题的最优解所得出。但是对贪心算法来说，问题的最优解必来自其某一个子问题的最优解。比如在 coins = [1,2,5],amount=11，这个例子中，贪心算法的思想是，每次尽可能选大的面额，f(11)必然来自 f(6)，f(6)必然来自 f(1)，但是这个问题不能用贪心算法，因为它并不对所有的 coins和 amount 有用，比如coins=[1,5,11]，amount=15，最优解应为 5+5+5 而不是11+1+1+1。</li>
+<li>重叠子问题，也就是问题被划分之后并不是独立的。比如说在 coins=[1,2,5]这个例子中，凑 amount=5,有5,1+1+1+2,1+2+2这三种情况，但在凑 5 之后的任何数，每次都得考虑这三个凑的情况。</li>
+</ol>
+<p>对于一个动态规划问题，步骤如下：</p>
+<ol>
+<li>拆分成子问题</li>
+<li>确认状态及边界条件</li>
+<li>状态转移方程</li>
+</ol>
+<p>对于 LeetCode322,步骤如下：</p>
+<ol>
+<li>拆分：将 n 张钞票凑成 amount 分解成n-1张钞票凑成 amount-coin for coin in coins</li>
+<li>边界条件，dp[0]=0,dp[1]=1,dp[2]=1,dp[5]=1</li>
+<li>状态转移方程，dp[n]=min(dp[n-1],dp[n-2],dp[n-5])+1</li>
+</ol>
+<pre><code>def coinChange(coins,amount):
+    dp = [-1 for i in range(amount+1)]
+    if amount==0:
+        return 0
+    for coin in coins:
+        if coin==amount:
+            return 1
+        if coin&lt;amount:
+            dp[coin]=1
+    for i in range(amount+1):
+        for coin in coins:
+            if i-coin&gt;=0 and dp[i-coin]!=-1:
+                if dp[i-coin]==-1 or dp[i]&gt;dp[i-coin]+1:
+                    dp[i]=dp[i-coin]+1
+    
+    return dp[amount]
+    
+</code></pre>
+<p><strong>LeetCode 70.爬楼梯</strong><br>
+<strong>在爬楼梯时，每次可向上走 1 阶台阶或2阶台阶，问n 阶楼梯有多少种上楼的方式？</strong></p>
+<p>步骤：</p>
+<ol>
+<li>拆分，走 n 阶拆分成走 n-1阶和 n-2阶</li>
+<li>确认边界条件，dp[1]=1,dp[2]=2</li>
+<li>状态转移方程，dp[n]=dp[n-1]+dp[n-2]<br>
+(事实上这就是斐波拉契数列）</li>
+</ol>
+<pre><code>def fib(n):
+    fib=[1,1]
+    i=2
+    while i&lt;=n:
+      fib.append(fib[i-1]+fib[i-2])
+      i += 1
+    return fib[n]
+</code></pre>
+<p><strong>LeetCode 198.打家劫舍</strong><br>
+<strong>在一条直线上，有n个房屋，每个房屋中有数量不等的财宝，有一个盗 贼希望从房屋中盗取财宝，由于房屋中有报警器，如果同时从相邻的两个房屋中盗取财宝就会触发报警器。问在不触发报警器的前提下，最多可获取多少财宝？</strong><br>
+<strong>示例</strong><br>
+输入：[5，2，6，3，1，7]<br>
+输出：18</p>
+<p>步骤：</p>
+<ol>
+<li>拆分，把问题拆分成是否偷当前这一家</li>
+<li>确认边界条件，dp[0]=nums[0],dp[1]=max(nums[0],nums[1])</li>
+<li>状态转移方程，dp[i]=max(dp[i-1),dp[i-2]+nums[i])</li>
+</ol>
+<pre><code>def rob(self, nums: List[int]) -&gt; int:
+    n=len(nums)
+    if n==0:
+        return 0
+    if n==1:
+        return nums[0]
+    dp=[nums[0],max(nums[0],nums[1])]+[0 for i in range(n-2)]
+    for i in range(2,n):
+        dp[i]=max(dp[i-1],dp[i-2]+nums[i])
+
+    return dp[n-1]
+</code></pre>
+<p><strong>LeetCode 53.最大字段和</strong><br>
+<strong>给定一个数组，求这个数组的连续子数组中，最大的那一段的和</strong><br>
+<strong>示例</strong><br>
+输入:nums=[-2,1,-3,4,-1,2,1,-5,4]<br>
+输出:6</p>
+<p>步骤</p>
+<ol>
+<li>拆分，把问题拆分成先求出以当前位置结束的最大子数组之后</li>
+<li>确认边界条件，dp[0]=nums[0]，dp[1]=max(nums[1],nums[1]+dp[0])</li>
+<li>状态转移方程，dp[i]=max[nums[i],dp[i-1]+nums[i]]</li>
+</ol>
+<pre><code>def maxSubArray(self, nums: List[int]) -&gt; int:
+    n=len(nums)
+    if n==0:
+        return 
+    if n==1:
+        return nums[0]
+    dp=[nums[0],max(nums[1],nums[1]+nums[0])]
+    maxi=max(dp[0],dp[1])
+    for i in range(2,n):
+        dp.append(max(nums[i],nums[i]+dp[i-1]))
+        maxi=max(dp[i],maxi)
+
+    return maxi
+</code></pre>
+<p><strong>LeetCode 120. 三角形数组和最小路径</strong><br>
+**给定一个二维数组，其保存了一个数字三角形 triangleMatrix[][]，求从数字三角形顶端到底端各数字和最小的路径之和，每次可以向下走相邻的两个位置<br>
+<strong>示例</strong><br>
+输入：<br>
+[<br>
+[2],<br>
+[3,4],<br>
+[6,5,7],<br>
+[4,1,8,3]<br>
+]<br>
+输出：11 （2+3+5+7）</p>
+<p>步骤：</p>
+<ol>
+<li>拆分，走到底端，必然是通过最后一行中的各个数得来的，以此类推</li>
+<li>确认边界条件，dp[0][0]=nums[0][0]</li>
+<li>状态转移方程，dp[i][j]=min(dp[i-1][j-1],dp[i-1][j])+nums[i,j]</li>
+</ol>
+<pre><code>def minimum(nums):
+    n=len(nums)
+    if n==0:
+        return 
+    mini=10000
+    dp=[[10000 for i in range(len(nums[-1]))] for j in range(n)]
+    dp[0][0]=nums[0][0]
+    for i in range(1,n):
+        for j in range(len(nums[i])):
+            if j-1&gt;=0:
+                dp[i][j]=min(dp[i-1][j-1],dp[i-1][j])+nums[i][j]
+            else:
+                dp[i][j]=dp[i-1][j]+nums[i][j]
+    print(dp)
+    return dp[n-1]
+
+mini=10000
+s=minimum(triangle)
+for x in s:
+    mini=min(mini,x)
+return mini
+
+</code></pre>
+<p><strong>LeetCode.300 最长上升子序列</strong><br>
+<strong>已知一个未排序数组，求这个数组最长上升子序列的长度</strong><br>
+<strong>示例：</strong><br>
+输入：[1,3,2,3,1,4]<br>
+输出：4（[1,2,3,4])</p>
+<p>步骤：</p>
+<ol>
+<li>拆分，dp数组表现以当前元素结尾的最长上升子序列</li>
+<li>确认边界条件，dp[0]=nums[0]，</li>
+<li>状态转移方程，dp[i]=max((dp[j]+1) if nums[i]&gt;nums[j])</li>
+</ol>
+<pre><code>def lengthOfLIS(self, nums: List[int]) -&gt; int:
+    n=len(nums)
+    if n==0:
+        return 0
+    if n==1:
+        return 1
+    dp = [1]
+    for i in range(1,n):
+        maxi=1
+        for j in range(len(dp)):
+            if nums[i]&gt;nums[j]:
+                maxi=max(dp[j]+1,maxi)    
+        dp.append(maxi)
+
+    maxi=0
+    for x in dp:
+        maxi=max(maxi,x)
+    return maxi
+</code></pre>
+<p><strong>LeetCode 64.最短路径和</strong><br>
+<strong>已知一个二维数组，其中存储了非负整数，找到从左上角到右下角的一条路径，使得路径上的和最小（移动过程中只能向下或者向右）。</strong><br>
+<strong>示例：</strong><br>
+输入：[<br>
+[1,3,1],<br>
+[1,5,1],<br>
+[4,2,1]]<br>
+输出：7（1-3-1-1-1）</p>
+<p>步骤：</p>
+<ol>
+<li>拆分，路径的最后一步，要不来自上面，要不来自左边。</li>
+<li>确认边界状态，dp[0][0]=nums[0][0]</li>
+<li>状态转移方程，dp[i][j]=min(dp[i-1][j],dp[i,j-1])+nums[i][j]</li>
+</ol>
+<pre><code>def minpath(nums)
+    n=len(nums)
+    m=len(nums[0])
+    if n==0:
+        return 
+    dp=[[10000 for j in range(m)] for i in range(n)]
+    dp[0][0]=nums[0][0]
+    for i in range(n):
+        for j in range(m):
+            if i-1&gt;=0 and j-1&gt;=0:
+                dp[i][j]=min(dp[i-1][j],dp[i][j-1])+nums[i][j]
+            elif i-1&gt;=0:
+                dp[i][j]=dp[i-1][j]+nums[i][j]
+            elif j-1&gt;=0:
+                dp[i][j]=dp[i][j-1]+nums[i][j]
+    return dp[n-1][m-1]
+    
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://baoshuxie.github.io/post/hui-su-suan-fa-xiang-jie-python">
+              <h3 class="post-title">
+                回溯算法详解（python)
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: 'cce22e4eff570aeec78e',
+    clientSecret: 'dc18654ed33eea0848b49113a940bc9c9313576c',
+    repo: 'baoshuxie.github.io',
+    owner: 'baoshuxie',
+    admin: ['baoshuxie'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href= "https://github.com/getgridea/gridea"
+target="_blank">Gridea</a> | 
+  <a class="rss" href="https://baoshuxie.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
